@@ -205,7 +205,7 @@ function renderTable(rows){
   }
   tbody.innerHTML = rows.map(d=>`
     <tr>
-      <td><img class="thumb" src="${d.img||''}" loading="lazy" alt="${d.n}" onerror="this.style.visibility='hidden'"></td>
+      <td><img class="thumb" src="${d.img||''}" alt="${d.n}" onerror="this.style.visibility='hidden'"></td>
       <td>
         <div class="name-cell">
           <div>
