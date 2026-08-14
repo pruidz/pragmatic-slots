@@ -154,10 +154,10 @@
       <span class="chip active" data-filter="all">ყველა</span>
       <span class="chip" data-filter="eligible">ბონუს-უფლებამოსილი</span>
       <span class="chip" data-filter="not-eligible">არაუფლებამოსილი</span>
-      <span class="chip" data-filter="no-turnover">ბრუნვის გარეშე</span>
+      <span class="chip" data-filter="no-turnover">მონაცემის გარეშე</span>
       <select id="sortSelect">
-        <option value="bet-desc">ბრუნვა: მაღლიდან დაბლისკენ</option>
-        <option value="bet-asc">ბრუნვა: დაბლიდან მაღლისკენ</option>
+        <option value="users-desc">მომხმარებელი: მაღლიდან დაბლისკენ</option>
+        <option value="users-asc">მომხმარებელი: დაბლიდან მაღლისკენ</option>
         <option value="name-asc">სახელი: ა→ჰ</option>
         <option value="name-desc">სახელი: ჰ→ა</option>
       </select>
@@ -170,8 +170,6 @@
           <th style="width:90px">სურათი</th>
           <th>სლოტის სახელი</th>
           <th>ბონუსის უფლება</th>
-          <th class="num">ბრუნვა</th>
-          <th class="num">GGR</th>
           <th class="num">მომხმარებელი</th>
         </tr>
       </thead>
@@ -219,17 +217,17 @@ function computeStats(){
   const total = DATA.length;
   const withTurnover = DATA.filter(d=>d.b!==null).length;
   const eligible = DATA.filter(d=>d.e).length;
-  const totalBet = DATA.filter(d=>d.b!==null).reduce((a,d)=>a+d.b,0);
-  return {total, withTurnover, eligible, totalBet};
+  const totalUsers = DATA.filter(d=>d.u!==null && d.u!==undefined).reduce((a,d)=>a+d.u,0);
+  return {total, withTurnover, eligible, totalUsers};
 }
 
 function renderTiles(){
   const s = computeStats();
   const tiles = [
     {label:'სულ სლოტი', value: fmt(s.total)},
-    {label:'ბრუნვის მონაცემით', value: fmt(s.withTurnover)},
+    {label:'მონაცემით', value: fmt(s.withTurnover)},
     {label:'ბონუს-უფლებამოსილი', value: fmt(s.eligible), cls:'eligible'},
-    {label:'ჯამური ბრუნვა (₾)', value: fmt(s.totalBet)},
+    {label:'სულ მომხმარებელი', value: fmt(s.totalUsers)},
   ];
   document.getElementById('statTiles').innerHTML = tiles.map(t=>`
     <div class="tile">
@@ -238,7 +236,7 @@ function renderTiles(){
     </div>`).join('');
 }
 
-let state = { q:'', filter:'all', sort:'bet-desc' };
+let state = { q:'', filter:'all', sort:'users-desc' };
 
 function applyState(){
   let rows = DATA.slice();
@@ -251,8 +249,8 @@ function applyState(){
   if(state.filter==='no-turnover') rows = rows.filter(d=>d.b===null);
 
   rows.sort((a,b)=>{
-    if(state.sort==='bet-desc') return (b.b??-1)-(a.b??-1);
-    if(state.sort==='bet-asc') return (a.b??1e15)-(b.b??1e15);
+    if(state.sort==='users-desc') return (b.u??-1)-(a.u??-1);
+    if(state.sort==='users-asc') return (a.u??1e15)-(b.u??1e15);
     if(state.sort==='name-asc') return a.n.localeCompare(b.n,'ka');
     if(state.sort==='name-desc') return b.n.localeCompare(a.n,'ka');
     return 0;
@@ -264,7 +262,7 @@ function applyState(){
 function renderTable(rows){
   const tbody = document.getElementById('tbody');
   if(rows.length===0){
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">შედეგი არ მოიძებნა</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">შედეგი არ მოიძებნა</div></td></tr>`;
     return;
   }
   tbody.innerHTML = rows.map(d=>`
@@ -279,8 +277,6 @@ function renderTable(rows){
         </div>
       </td>
       <td>${d.e ? '<span class="badge good">✓ ბონუსი</span>' : '<span class="badge muted">— არა</span>'}</td>
-      <td class="num">${d.b===null ? '<span class="dash">—</span>' : fmt(d.b)}</td>
-      <td class="num">${d.g===null ? '<span class="dash">—</span>' : fmt(d.g)}</td>
       <td class="num">${d.u===null||d.u===undefined ? '<span class="dash">—</span>' : fmt(d.u)}</td>
     </tr>`).join('');
 }
